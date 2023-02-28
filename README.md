@@ -3,3 +3,5 @@
 Certain details have been omitted (some are omitted because they are part of projects I have yet to finish).
 
 All my endpoints are hosted on a single repository as it simplifies hosting on Microsoft Azure.
+
+Endpoints have been developed/implemented since July 2022.
