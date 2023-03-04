@@ -44,14 +44,6 @@ namespace React.Controllers
             return Ok(userOut);
         }
 
-        
-        //[HttpGet("wIdjs90218fjIOownvkdfoL")]
-        //public ActionResult<User> GetAll()
-        //{
-
-        //    IEnumerable<User> userMatch = _repo.GetAll();
-        //    return Ok(userMatch);
-        //}
 
 
         [HttpGet("GetAllSponsors")]
@@ -77,30 +69,6 @@ namespace React.Controllers
             return Ok();
         }
 
-        /* ---------------- this was used as a search bar, but it caused repeated requests, so it's now redundant. -------------*/
-
-        //[HttpGet("GetSponsorByName/{name}")]
-        //public ActionResult<Sponsors> GetSponsorByName(string name)
-        //{
-
-        //    IEnumerable<Sponsors> sponsor = _repo.GetSponsorByName(name);
-
-        //    if (sponsor == null)
-        //        return NotFound();
-        //    else
-        //    {
-        //        return Ok(sponsor);
-        //    }
-
-        //}
-
-        //[HttpGet("GetAllResults")]
-        //public ActionResult<RaceResult> GetResults()
-        //{
-
-        //    IEnumerable<RaceResult> userMatch = _repo.GetAllResults();
-        //    return Ok(userMatch);
-        //}
 
         /* ---------------- FOOD APP -------------*/
         [HttpPost("RestuarantUserRegister")]
@@ -161,13 +129,7 @@ namespace React.Controllers
             string DayOfWeek = date.DayOfWeek.ToString();
 
             Review data = new Review {
-                UserId = _repo.GetRestaurantUserId(user.Value),
-                RestaurantId = review.RestaurantId,
-                weekDay = DayOfWeek,
-                timeWaited = review.timeWaited,
-                requiredBooking = review.requiredBooking,
-                reviewDate = review.reviewDate,
-                reviewTime = review.reviewTime
+               // removed
             };
 
             _repo.AddReview(data);

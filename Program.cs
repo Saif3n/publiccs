@@ -5,10 +5,11 @@ using Microsoft.AspNetCore.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// enabling cors for my personal projects
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: "ReactJSDomain",
-        builder => { builder.WithOrigins("https://nicholas-wu.com", "http://localhost:3000", "https://nicholas-wu.com/?", "https://saif3n.github.io" ,"https://saif3n.github.io/", "https://saif3n.github.io/stockapp/", "https://saif3n.github.io/stockapp").AllowAnyHeader().AllowAnyMethod(); });
+        builder => { builder.WithOrigins("https://nicholas-wu.com", "https://saif3n.github.io/").AllowAnyHeader().AllowAnyMethod(); });
 });
 
 

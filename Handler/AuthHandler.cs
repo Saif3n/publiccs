@@ -35,21 +35,6 @@ namespace React.Handler
                 var credentials = Encoding.UTF8.GetString(credentialBytes).Split(":");
                 var username = credentials[0];
                 var password = credentials[1];
-
-
-                //if (_repository.CheckAdmin(username, password)) /* For admin user*/
-                //{
-                //    var claims = new[] { new Claim("admin", username) };
-
-                //    ClaimsIdentity identity = new ClaimsIdentity(claims, "Basic");
-                //    ClaimsPrincipal principal = new ClaimsPrincipal(identity);
-
-                //    AuthenticationTicket ticket = new AuthenticationTicket(principal, Scheme.Name);
-
-                //    return AuthenticateResult.Success(ticket);
-
-                //}
-                //else 
                 
                 if (_repository.CheckUser(username, password)) /* For normal user*/
                 {
