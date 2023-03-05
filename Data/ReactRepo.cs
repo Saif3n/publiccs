@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using React.Dtos;
 using React.Models;
 using System.Security.Cryptography;
 using System.Text;
@@ -46,7 +47,7 @@ namespace React.Data
         }
 
 
-        /* UNUSED, this causes repeated requests. */
+        /* This was used as a search functionality, but calling the endpoint every onInput causes unneccessary requests. */
         public IEnumerable<Sponsors> GetSponsorByName(string sponsorName)
         {
             string sponsorLower = sponsorName.ToLower();
@@ -55,7 +56,7 @@ namespace React.Data
         }
 
 
-        /* -------------%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%----------Related to stock website (in-dev)-------%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%------*/
+        /* --------------Related to stock website (in-dev)-------------*/
 
         public IEnumerable<Sponsors> GetAllSponsors()
         {
@@ -89,8 +90,6 @@ namespace React.Data
             return resultsDriver;
         }
 
-
-        /*-----------%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%-------RESTAURANT----------%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%-------*/
 
         /*---AUTHENTICATION ---*/
         public string hashMD5(string hashValue)
@@ -167,6 +166,111 @@ namespace React.Data
 
         }
 
+
+        public ReviewOut OutputReviewTime(Review time)
+        {
+            string format = "ddd MMM dd yyyy HH:mm:ss 'New Zealand Standard Time'";
+            string returnString = "";
+            string waitTime = CalculateWaitTime(time.timeWaited);
+
+            DateTime reviewDateTime = DateTime.ParseExact(time.reviewTime, format, CultureInfo.InvariantCulture);
+            TimeZoneInfo nzTimeZone = TimeZoneInfo.FindSystemTimeZoneById("New Zealand Standard Time");
+            DateTime nzdtReviewDateTime = TimeZoneInfo.ConvertTimeFromUtc(reviewDateTime.ToUniversalTime(), nzTimeZone);
+            TimeSpan timeSinceReview = DateTimeOffset.Now - nzdtReviewDateTime;
+
+            if (timeSinceReview.TotalMinutes <= 1)
+            {
+                returnString = "less than a minute ago";
+            }
+            else if (timeSinceReview.TotalMinutes < 60)
+            {
+                // Less than 1 hour ago
+                int timeSinceLastReview = (int)timeSinceReview.TotalMinutes;
+                returnString = timeSinceLastReview + " minutes ago";
+
+            }
+            else if (timeSinceReview.TotalHours < 24)
+            {
+                // Less than 1 day ago
+                int hours = (int)timeSinceReview.TotalHours;
+                int minutes = timeSinceReview.Minutes;
+                returnString = $"{hours} hr {minutes} minutes ago";
+
+            }
+            else
+            {
+                // More than 1 day ago
+                int days = (int)timeSinceReview.TotalDays;
+                returnString = $"{days} days ago";
+            }
+
+            ReviewOut a = new ReviewOut { timeSinceLastReview = returnString, timeWaited = waitTime };
+
+            return a;
+        }
+
+        public string CalculateWaitTime(int timeWaited)
+        {
+            string waitTime = "";
+
+            if (timeWaited <= 1)
+            {
+                waitTime = "less than a minute";
+            }
+            else if (timeWaited <= 60)
+            {
+                waitTime = $"{timeWaited} minutes";
+            }
+            else if (timeWaited > 60)
+            {
+                int calcWaitMin = timeWaited % 60;
+
+                int calcWaitHour = timeWaited / 60;
+
+                waitTime = $"{calcWaitHour} hr {calcWaitMin} minute(s)";
+            }
+
+            return waitTime;
+        }
+
+        public async Task<Dictionary<string, WeekdayOut>> GetAverageTimeWeekdays(string companyName)
+        {
+            int companyId = await GetCompanyIdByName(companyName);
+            Dictionary<string, WeekdayOut> results = new Dictionary<string, WeekdayOut>();
+
+            foreach (var weekday in Enum.GetValues(typeof(DayOfWeek)))
+            {
+                string weekdayName = weekday.ToString();
+
+                List<Review> reviews = await _dbContext.Review
+                    .Where(Review => Review.CompanyId == companyId && Review.weekDay.ToLower() == weekdayName.ToLower())
+                    .ToListAsync();
+
+                if (reviews.Count == 0)
+                {
+                    WeekdayOut b = new WeekdayOut
+                    {
+                        avgWaitTime = "We unfortunately do not have enough info for this day, please help us by adding a review!",
+                        numberOfReviews = ""
+                    };
+
+                    results.Add(weekdayName, b);
+                }
+                else
+                {
+                    int avgWaitTime = (int)reviews.Average(r => r.timeWaited);
+                    WeekdayOut a = new WeekdayOut
+                    {
+                        avgWaitTime = CalculateWaitTime(avgWaitTime),
+                        numberOfReviews = "Based on the average wait time from " + reviews.Count.ToString() + " review(s)"
+                    };
+
+                    results.Add(weekdayName, a);
+                }
+            }
+
+            return results;
+        }
 
 
     }
